@@ -1,4 +1,48 @@
-# Simple boot menu for booting Linux kernels using Kexec Hardboot and DTB (device tree) on ASUS TF300T
+# Kexec-Hardboot based bootloader/boot menu for booting modern Linux kernels on ASUS TF300T
+
+supports device trees (DTB)
+
+# Installation
+## Requirements
+- ASUS TF300T tablet, or TF700T, TF201 (untested)
+- PC with `adb` and `fastboot` installed
+- `boot.blob` and `android-bootfiles.zip` (available from releases page of this repo)
+- microSD or USB drive with an image of your favorite linux distribution for ARM
+
+
+## Setup Android Dual-Booting (optional)
+
+This loader will be installed to the tablet's boot partition. The Android kernel 
+and initrd, which would normally be there, need to be moved to a different place.
+
+extract the android bootfiles and upload the directory using `adb` as `/sdcard/boot`:
+```
+unzip android-bootfiles.zip
+adb push android-bootfiles /sdcard/boot
+```
+
+Now you should have the following files in `/sdcard/boot`:
+- `zImage-android`: Kernel image for Android
+- `initrd-android`: Ramdisk image for Android
+- `android.dtbootmenu`: Loader entry for this loader.
+
+Important: The zImage and initrd files are dependent on the Android ROM you use. The ones
+provided in this repo are from KatKiss version #039. If you use another ROM you have to
+extract them from your ROMs `boot.blob` using `blobunpack` and `abootimg`.
+
+
+## Prepare the linux drive
+
+## Flash the loader
+
+Put the tablet into fastboot mode by holding the `Volume Down` key while starting. Run the 
+following to flash:
+```
+fastboot flash boot.img
+fastboot reboot
+```
+
+
 
 ## Requirements
 ### Tools on Host
