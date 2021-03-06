@@ -57,12 +57,15 @@ void Entry::run()
 
     pid_t pid;
     pid = fork();
+    
+    string fullDtbPath = string("/") + dtbPath + ".dtb";
+    
     if (pid == 0)
     {
         if (legacy)
             execl("/kexec", "/kexec", "--load", zImage.c_str(), "--initrd", initrd.c_str(), "--command-line", cmdline.c_str(), "--mem-min=0x85000000", "--atags", NULL);
         else
-            execl("/kexec", "/kexec", "--load", zImage.c_str(), "--initrd", initrd.c_str(), "--command-line", cmdline.c_str(), "--mem-min=0x85000000", "--dtb", "/tegra30-tf300t.dtb", NULL);
+            execl("/kexec", "/kexec", "--load", zImage.c_str(), "--initrd", initrd.c_str(), "--command-line", cmdline.c_str(), "--mem-min=0x85000000", "--dtb", fullDtbPath.c_str(), NULL);
     }
     int status;
     waitpid(pid, &status, 0);
