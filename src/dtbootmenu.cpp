@@ -41,6 +41,8 @@ int main()
     if (mount(NULL, "/dev", "devtmpfs", 0, "") != 0)
         cout << "Failed to mount deftmpfs\n";
 
+    detectModel();
+
     scanDisks(2);
 
 

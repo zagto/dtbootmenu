@@ -21,6 +21,7 @@ using namespace std;
 #include "entry.h"
 #include "entryfile.h"
 #include "ui.h"
+#include "model.h"
 
 
 extern string errorLog;
