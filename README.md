@@ -39,7 +39,7 @@ Now, add a file called `mylinux.dtboomenu` with the following contents:
 ```
 kernel: <name of your zImage file>
 initrd: <name of initrd file that comes with distro>
-title: Debian
+title: <title the entry should have in the menu>
 cmdline: console=tty0 root=<root device> rw
 ```
 The root drive is the typical Linux block device path your Linux installation is on, for example `/dev/mmcblk1p1`
