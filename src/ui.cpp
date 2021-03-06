@@ -9,11 +9,6 @@ int selection = 0;
 using namespace ui;
 
 
-void ui::clearScreen()
-{
-    cout << "\033[2J";
-}
-
 string fitText(string str)
 {
     size_t maxlen = termWidth - 3 - X * 2;

@@ -2,7 +2,6 @@
 
 void scanDisks(int delay)
 {
-    ui::clearScreen();
     sleep(delay);
     entries = {};
 
@@ -43,7 +42,7 @@ int main()
 
     detectModel();
 
-    scanDisks(2);
+    scanDisks(1);
 
 
     ui::mainLoop();

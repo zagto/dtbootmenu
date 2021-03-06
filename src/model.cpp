@@ -4,5 +4,5 @@ string dtbPath;
 
 void detectModel() {
     dtbPath = loadFile("/proc/tegra3_project");
-    cout << "model: " << dtbPath << endl;
+    cout << "dtbootmenu on " << dtbPath << endl;
 }

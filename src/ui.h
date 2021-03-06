@@ -4,7 +4,6 @@
 namespace ui
 {
     void initTerminal();
-    void clearScreen();
     void mainLoop();
 }
 
