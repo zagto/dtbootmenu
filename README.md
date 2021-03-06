@@ -11,7 +11,6 @@ supports device trees (DTB)
 
 
 ## Setup Android Dual-Booting (optional)
-
 This loader will be installed to the tablet's boot partition. The Android kernel 
 and initrd, which would normally be there, need to be moved to a different place.
 
@@ -31,68 +30,82 @@ provided in this repo are from KatKiss version #039. If you use another ROM you 
 extract them from your ROMs `boot.blob` using `blobunpack` and `abootimg`.
 
 
-## Prepare the linux drive
+## Prepare the Linux disk
+In the `/boot` directory, where the kernels and initrds are, add your zImage (we assume here you want to use
+ a custom kernel from the [Grate](https://github.com/grate-driver/linux.git) poject, which includes drivers
+ needed for our device that are not yet upstreamed).
+ 
+Now, add a file called `mylinux.dtboomenu` with the following contents:
+```
+kernel: <name of your zImage file>
+initrd: <name of initrd file that comes with distro>
+title: Debian
+cmdline: console=tty0 root=<root device> rw
+```
+The root drive is the typical Linux block device path your Linux installation is on, for example `/dev/mmcblk1p1`
+for first partition of the microSD, or `/dev/sda1` for first partition of USB drive.
+
+Complete example:
+
+```
+kernel: zImage-grate
+initrd: initrd.img
+title: Debian
+cmdline: console=tty0 root=/dev/mmcblk1p1 rw
+```
 
 ## Flash the loader
 
 Put the tablet into fastboot mode by holding the `Volume Down` key while starting. Run the 
 following to flash:
 ```
-fastboot flash boot.img
+fastboot flash boot boot.blob
 fastboot reboot
 ```
 
+# Building from Sources
+## `boot.blob`
+### Requirements
+- GCC Cross-compiler targeting armv7 Linux with C++ support. In this example the target is called
+`arm-unknown-linux-uclibcgnueabi`. Change accordingly if yours calls the target differently.
+- [blobtools](https://github.com/AndroidRoot/BlobTools), `abootimg`, `adb`, `fastboot`
+- everything required to compile a Linux kernel
 
-
-## Requirements
-### Tools on Host
-- Cross-compiler toolchain with C++ support
-- [blobtools](https://github.com/AndroidRoot/BlobTools), abootimg, fastboot
-
-### Things you cross-compile 
-- Kernel with Kexec Hardboot DTB support:
-  <https://github.com/tzagorni/tf300t-dtboot-kernel>
-- kexec-tools (requires zlib):
-  <https://mirrors.edge.kernel.org/pub/linux/utils/kernel/kexec/>
-- A device tree binary file for the device (`tegra30-tf300t.dtb`).
-  In a kernel source tree that contains the right device tree source ([mine](https://github.com/tzagorni/linux-tf300t)), run:
-  ```
-  make tegra30-tf300t.dtb
-  ```
-  The resulting file will be in `arch/arm/dts/tegra30-tf300t.dtb`
-
-*make sure to set `$CC`/`CXX` variables etc. for cross compiling and to use static linking*
-
-## Building the boot menu binary `dtbootmenu`
+### Building the Kexec-Hardboot kernel
 ```
-pushd src
-make
-popd
+git clone https://github.com/zagto/tf300t-dtboot-kernel
+cd tf300t-dtboot-kernel
+export ARCH=arm
+export CROSS_COMPILE=arm-unknown-linux-uclibcgnueabi-
+make make tf300t_dtbootloader_defconfig
+make zImage -j16
 ```
 
-## Setup Android Dual-Booting (optional)
-*ideally, all of this should happen automatically in a "flashable zip" or something. But currently nothing like this is implemented.*
-
-On the device, create a directory named `boot` in the internal "SD card" directory. Place the following files in it
-- `zImage-android`: Kernel image for Android (extract from your ROM's installer zip using abootimg)
-- `initrd-android`: Ramdisk image for Android (extract from your ROM's installer zip using abootimg)
-- `android.dtbootmenu` with the following contents:
-  ```
-  kernel: zImage-android
-  initrd: initrd-android
-  title: Android
-  legacy
-  ```
-
-## Flashing
-You need:
-- Kernel zImage binary (tf300t-dtboot-kernel)
-- `tegra30-tf300t.dtb` file
-- `kexec` binary
-- `dtbootmenu` binary
-
+### Building the user-space kexec binary
 ```
-./create-boot-blob.sh <zImage> <dtb file> <kexec binary> src/dtbootmenu
-sudo fastboot flash boot boot.blob
+git://git.kernel.org/pub/scm/utils/kernel/kexec/kexec-tools.git
+cd kexec-tools
+LDFLAGS=-static ./configure --host=arm-unknown-linux-uclibcgnueabi
+make -j16
 ```
 
+### Building the menu binary from this repo
+```
+cd src
+make CXX=arm-unknown-linux-uclibcgnueabi-g++ CXXFLAGS=-static
+```
+
+### Combining it all together
+```
+./create-boot-blob.sh tf300t-dtboot-kernel/arch/arm/boot/zImage kexec-tools/build/sbin/kexec src/dtbootmenu
+```
+
+## DTBs
+```
+git clone https://github.com/grate-driver/linux.git
+cd linux
+export ARCH=arm
+make tegra30-asus-tf201.dtb
+make tegra30-asus-tf300t.dtb
+make tegra30-asus-tf700t.dtb
+```
