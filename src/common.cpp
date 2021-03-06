@@ -38,7 +38,8 @@ string loadFile(string filename)
     {
         char c;
         file.read(&c, 1);
-        result += c;
+        if (file.good())
+            result += c;
     }
     file.close();
 
