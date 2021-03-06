@@ -83,8 +83,9 @@ make zImage -j16
 
 ### Building the user-space kexec binary
 ```
-git://git.kernel.org/pub/scm/utils/kernel/kexec/kexec-tools.git
+git clone git://git.kernel.org/pub/scm/utils/kernel/kexec/kexec-tools.git
 cd kexec-tools
+./bootstrap
 LDFLAGS=-static ./configure --host=arm-unknown-linux-uclibcgnueabi
 make -j16
 ```
