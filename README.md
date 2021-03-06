@@ -77,7 +77,7 @@ git clone https://github.com/zagto/tf300t-dtboot-kernel
 cd tf300t-dtboot-kernel
 export ARCH=arm
 export CROSS_COMPILE=arm-unknown-linux-uclibcgnueabi-
-make make tf300t_dtbootloader_defconfig
+make tf300t_dtbootloader_defconfig
 make zImage -j16
 ```
 
