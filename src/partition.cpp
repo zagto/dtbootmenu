@@ -22,7 +22,9 @@ void Partition::scanDir(string dirname)
         while ((entry = readdir(dir)) != NULL)
         {
             string name = entry->d_name;
+#ifdef DEBUG_SCAN
             cout << "Found file " << entry->d_name << ".\n";
+#endif
             if (checkExtension(name, ".dtbootmenu"))
             {
                 Entry entry = EntryFile(path, dirname, name).parse();
@@ -46,14 +48,20 @@ Partition::Partition(string _path)
 
 void Partition::scan(vector<string> directories)
 {
+#ifdef DEBUG_SCAN
     cout << "Scanning " + path + "\n";
+#endif
     if (mount(path.c_str(), "/tmpmount", "ext4", MS_RDONLY, "") == 0)
     {
+#ifdef DEBUG_SCAN
         cout << "Found supported file system on " + path + ".\n";
+#endif
 
         for (string &d: directories)
         {
+#ifdef DEBUG_SCAN
             cout << "Scanning " + d + " on " + path + "\n";
+#endif
             scanDir("/tmpmount/" + d);
         }
 
