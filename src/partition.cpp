@@ -22,6 +22,7 @@ void Partition::scanDir(string dirname)
         while ((entry = readdir(dir)) != NULL)
         {
             string name = entry->d_name;
+            cout << "Found file " << entry->d_name << ".\n";
             if (checkExtension(name, ".dtbootmenu"))
             {
                 Entry entry = EntryFile(path, dirname, name).parse();
@@ -29,34 +30,30 @@ void Partition::scanDir(string dirname)
                     entries.push_back(entry);
             }
 
-            if (override)
+            if (checkExtension(name, ".dtb"))
             {
-                if (checkExtension(name, ".dtb"))
-                {
-                    cout << "Unsing external " << name << " from " << path << ".\n";
-                    saveFile("/" + name, loadFile(dirname + "/" + name));
-                }
+                cout << "Unsing external " << name << " from " << path << ".\n";
+                saveFile("/" + name, loadFile(dirname + "/" + name));
             }
         }
     }
 }
 
-Partition::Partition(string _path, bool _override)
+Partition::Partition(string _path)
 {
     path = _path;
-    override = _override;
 }
 
 void Partition::scan(vector<string> directories)
 {
-    //cout << "Scanning " + path + "\n";
+    cout << "Scanning " + path + "\n";
     if (mount(path.c_str(), "/tmpmount", "ext4", MS_RDONLY, "") == 0)
     {
-        //cout << "Found supported file system on " + path + ".\n";
+        cout << "Found supported file system on " + path + ".\n";
 
-        for (string d: directories)
+        for (string &d: directories)
         {
-            //cout << "Scanning " + d + " on " + path + "\n";
+            cout << "Scanning " + d + " on " + path + "\n";
             scanDir("/tmpmount/" + d);
         }
 

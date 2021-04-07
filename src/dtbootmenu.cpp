@@ -5,7 +5,7 @@ void scanDisks(int delay)
     sleep(delay);
     entries = {};
 
-    Partition("/dev/mmcblk0p8", true).scan({"media/0/boot"});
+    Partition("/dev/mmcblk0p8").scan({"media/0/boot"});
 
     for (int disk = 1; fileExists("/dev/mmcblk" + to_string(disk)); disk++)
     {
@@ -16,8 +16,8 @@ void scanDisks(int delay)
 
     for (int disk = 0; fileExists((string)"/dev/sd" + (char)('a' + disk)); disk++)
     {
-        Partition((string)"/dev/sd" + (char)('a' + (char)disk)).scan();
-        for (int part = 1; fileExists("/dev/sd" + (char)('a' + disk) + to_string(part)); part++)
+        Partition((string)"/dev/sd" + to_string('a' + (char)disk)).scan();
+        for (int part = 1; fileExists("/dev/sd" + to_string('a' + disk) + to_string(part)); part++)
             Partition((string)"/dev/sd" + (char)('a' + disk) + to_string(part)).scan();
     }
 }
@@ -42,7 +42,7 @@ int main()
 
     detectModel();
 
-    scanDisks(1);
+    scanDisks(5);
 
 
     ui::mainLoop();
