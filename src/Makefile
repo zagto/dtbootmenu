@@ -1,4 +1,4 @@
 dtbootmenu: *.cpp *.h
-	$(CXX) $(CXXFLAGS) -o dtbootmenu *.cpp
+	$(CXX) $(CXXFLAGS) -std=c++17 -o dtbootmenu *.cpp
 
 all: dtbootmenu
