@@ -33,14 +33,9 @@ void Entry::run() {
     std::string actualCommandLine;
     if (legacy) {
         actualCommandLine = loadFile("/proc/cmdline");
-        actualCommandLine = actualCommandLine.substr(cmdline.find("tegraid="));
+        actualCommandLine = actualCommandLine.substr(actualCommandLine.find("tegraid="));
     } else {
         actualCommandLine = cmdline;
-    }
-
-    if (cmdline == "") {
-        std::cout << "No cmdline, aborting\n";
-        while (1);
     }
 
     pid_t pid;
