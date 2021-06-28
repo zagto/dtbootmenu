@@ -1,4 +1,10 @@
 #include "common.h"
+#include "ui.h"
+#include <iostream>
+#include <string>
+#include <termios.h>
+#include <sys/ioctl.h>
+#include <unistd.h>
 
 const int Y = 4;
 const int X = 2;
@@ -9,7 +15,7 @@ int selection = 0;
 using namespace ui;
 
 
-string fitText(string str)
+std::string fitText(std::string str)
 {
     size_t maxlen = termWidth - 3 - X * 2;
     if (str.length() > maxlen)
@@ -22,16 +28,16 @@ string fitText(string str)
 
 void printEntry(int index)
 {
-    cout << "\033[" << (Y + index) <<"B\033[" << X << "C";
+    std::cout << "\033[" << (Y + index) <<"B\033[" << X << "C";
 
-    string title = fitText(entries[index].getTitle());
+    std::string title = fitText(entries[index].title);
 
     if (index == selection)
-        cout << "\e[7m → " << title << "\e[27m";
+        std::cout << "\e[7m → " << title << "\e[27m";
     else
-        cout << "   " << title;
+        std::cout << "   " << title;
 
-    cout << "\033[" << termWidth - X <<"D\033[" << (Y + index) << "A";
+    std::cout << "\033[" << termWidth - X <<"D\033[" << (Y + index) << "A";
 
 }
 
@@ -64,8 +70,6 @@ void ui::initTerminal()
 
 void ui::mainLoop()
 {
-    cout << errorLog;
-
     for (size_t i = 0; i < entries.size(); i++)
         printEntry(i);
 

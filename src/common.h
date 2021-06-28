@@ -1,10 +1,8 @@
-#ifndef COMMON_H
-#define COMMON_H
+#pragma once
 
-#include <iostream>
+/*#include <iostream>
 #include <string>
 #include <fstream>
-#include <vector>
 #include <algorithm>
 #include <sys/ioctl.h>
 #include <unistd.h>
@@ -13,28 +11,18 @@
 #include <sys/mount.h>
 #include <sys/wait.h>
 #include <dirent.h>
+*/
+#include <vector>
 
-using namespace std;
-
-
-#include "partition.h"
 #include "entry.h"
-#include "entryfile.h"
-#include "ui.h"
-#include "model.h"
+
+extern std::vector<Entry> entries;
 
 
-extern string errorLog;
+bool fileExists(std::string filename);
 
-extern vector<Entry> entries;
+std::string trim(std::string str);
+std::string lower(std::string str);
 
-
-bool fileExists(string filename);
-
-string trim(string str);
-string lower(string str);
-
-string loadFile(string filename);
-void saveFile(string filename, string data);
-
-#endif // COMMON_H
+std::string loadFile(std::string filename);
+void saveFile(std::string filename, std::string data);

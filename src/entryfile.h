@@ -1,26 +1,27 @@
-#ifndef ENTRYFILE_H
-#define ENTRYFILE_H
+#pragma once
 
+#include <string>
+#include <optional>
+#include "entry.h"
 
-class EntryFile
-{
+class EntryParser {
     private:
-        string path, filename;
-        string partitionPath;
-        string param, value;
+        std::string path;
+        std::string filename;
+        std::string partitionPath;
+
+        std::string param;
+        std::string value;
         size_t lineNumber;
 
-        string kernel, initrd, title, cmdline;
+        std::optional<std::string> kernel, initrd, title, cmdline, dtbFile;
         bool legacy;
 
-        void elog(string msg);
-        void checkStringParam(string *save);
-        void checkFileParam(string *save);
+        void elog(std::string msg) const;
+        void checkStringParam(std::optional<std::string> &save) const;
+        void checkFileParam(std::optional<std::string> &save) const;
 
     public:
-        EntryFile(string _partitionPath, string _path, string _filename);
-        Entry parse();
+        EntryParser(std::string partitionPath, std::string path, std::string filename);
+        std::optional<Entry> parse();
 };
-
-
-#endif // ENTRYFILE_H

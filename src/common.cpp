@@ -1,39 +1,43 @@
 #include "common.h"
+#include <fstream>
+#include <iostream>
+#include <algorithm>
+#include <sys/stat.h>
 
-string errorLog = "";
+std::string errorLog = "";
 
-vector<Entry> entries;
+std::vector<Entry> entries;
 
 
-bool fileExists(string filename)
+bool fileExists(std::string filename)
 {
     struct stat st;
     return stat(filename.c_str(), &st) == 0;
 }
 
-string trim(string str)
+std::string trim(std::string str)
 {
-    str.erase(str.begin(), find_if_not(str.begin(), str.end(), ptr_fun<int, int>(isspace)));
-    str.erase(find_if_not(str.rbegin(), str.rend(), ptr_fun<int, int>(isspace)).base(), str.end());
+    str.erase(str.begin(), find_if_not(str.begin(), str.end(), std::ptr_fun<int, int>(isspace)));
+    str.erase(find_if_not(str.rbegin(), str.rend(), std::ptr_fun<int, int>(isspace)).base(), str.end());
     return str;
 }
 
-string lower(string str)
+std::string lower(std::string str)
 {
     transform(str.begin(), str.end(), str.begin(), ::tolower);
     return str;
 }
 
-string loadFile(string filename)
+std::string loadFile(std::string filename)
 {
-    ifstream file(filename);
+    std::ifstream file(filename);
     if (!file)
     {
-        cout << "Unable to load file " << filename << "\n";
+        std::cerr << "Unable to load file " << filename << std::endl;
         return "";
     }
 
-    string result = "";
+    std::string result = "";
     while (file.good())
     {
         char c;
@@ -46,12 +50,12 @@ string loadFile(string filename)
     return result;
 }
 
-void saveFile(string filename, string data)
+void saveFile(std::string filename, std::string data)
 {
-    ofstream file(filename);
+    std::ofstream file(filename);
     if (!file)
     {
-        cout << "Unable to write file " << filename << "\n";
+        std::cerr << "Unable to write file " << filename << std::endl;
         return;
     }
 

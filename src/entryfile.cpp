@@ -1,96 +1,93 @@
+#include "entryfile.h"
 #include "common.h"
+#include <fstream>
+#include <iostream>
 
-void EntryFile::elog(string msg)
-{
-    errorLog += filename + ": line " + to_string(lineNumber) + ": " + msg + "\n";
+void EntryParser::elog(std::string msg) const {
+    std::cerr << filename << ": line " << lineNumber << ": " << msg << std::endl;
 }
 
-void EntryFile::checkStringParam(string *save)
+void EntryParser::checkStringParam(std::optional<std::string> &save) const
 {
-    if (value != "")
-    {
-        if (*save != "")
-            elog("Overwriting propery \"" + param + "\"");
-        *save = value;
+    if (save) {
+        elog("Overwriting propery \"" + param + "\"");
     }
-    else
-    {
-        elog("setting propery \"" + param + "\" to empty string is not allowed");
-    }
+    save = value;
 }
 
-void EntryFile::checkFileParam(string *save)
-{
-    if (fileExists(path + "/" + value))
+void EntryParser::checkFileParam(std::optional<std::string> &save) const {
+    if (fileExists(path + "/" + value)) {
         checkStringParam(save);
-    else
+    } else {
         elog("File not found");
+    }
 }
 
-EntryFile::EntryFile(string _partitionPath, string _path, string _filename)
-{
-    partitionPath = _partitionPath;
-    path = _path;
-    filename = _filename;
-}
+EntryParser::EntryParser(std::string partitionPath, std::string path, std::string filename) :
+    path{path},
+    filename{filename},
+    partitionPath{partitionPath} {}
 
-Entry EntryFile::parse()
-{
-    kernel = initrd = title = cmdline = "";
+std::optional<Entry> EntryParser::parse() {
     legacy = false;
 
-    ifstream file(path + "/" + filename);
-    if (file)
-    {
-
-        string line;
-        lineNumber = 1;
-        while (getline(file, line))
-        {
-            line = trim(line);
-            if (line == "legacy")
-            {
-                legacy = true;
-            }
-            else if (!(line == "" || line[0] == '#'))
-            {
-                size_t pos = line.find(':');
-                if (pos == string::npos)
-                {
-                    elog("No colon (':') found");
-                }
-                else
-                {
-                    param = trim(lower(line.substr(0, pos)));
-                    value = trim(line.substr(pos + 1));
-                    if (param == "kernel" || param == "initrd")
-                    {
-                        checkFileParam(param == "kernel" ? &kernel : &initrd);
-                    }
-                    else if (param == "title")
-                    {
-                        checkStringParam(&title);
-                    }
-                    else if (param == "cmdline")
-                    {
-                        if (value == "")
-                            value = " ";
-                        checkStringParam(&cmdline);
-                    }
-                }
-            }
-            lineNumber++;
-        }
+    std::ifstream file(path + "/" + filename);
+    if (!file) {
+        std::cerr << "Could not open entry file " << filename << std::endl;
+        return {};
     }
 
-    if (legacy && kernel != "" && initrd != "" && title != "")
-        return Entry(partitionPath, title, path + "/" + kernel, path + "/" + initrd);
-    else if (kernel != "" && initrd != "" && title != "" && cmdline != "")
-        return Entry(partitionPath, title, path + "/" + kernel, path + "/" + initrd, cmdline);
-    else
-    {
-        errorLog += filename + ": Incomplete entry file\n";
-        return Entry();
+    std::string line;
+    lineNumber = 1;
+
+    while (getline(file, line)) {
+        line = trim(line);
+        if (line == "legacy") {
+            legacy = true;
+        } else if (!(line == "" || line[0] == '#')) {
+            size_t pos = line.find(':');
+            if (pos == std::string::npos) {
+                elog("No colon (':') found");
+            } else {
+                param = trim(lower(line.substr(0, pos)));
+                value = trim(line.substr(pos + 1));
+
+                if (param == "kernel") {
+                    checkFileParam(kernel);
+                } else if (param == "initrd") {
+                    checkFileParam(initrd);
+                } else if (param == "dtb") {
+                    checkFileParam(dtbFile);
+                } else if (param == "title") {
+                    checkStringParam(title);
+                } else if (param == "cmdline") {
+                    checkStringParam(cmdline);
+                }
+            }
+        }
+        lineNumber++;
+    }
+
+    if (legacy && cmdline) {
+        std::cerr << filename + ": Both cmdline and legacy arguments set" << std::endl;
+        return {};
+    }
+
+    if (legacy && kernel && initrd && title) {
+        return Entry(partitionPath,
+                     *title,
+                     path + "/" + *kernel,
+                     path + "/" + *initrd);
+    } else if (kernel && initrd && title && cmdline) {
+        return Entry(partitionPath,
+                     *title,
+                     path + "/" + *kernel,
+                     path + "/" + *initrd,
+                     *cmdline,
+                     dtbFile);
+    } else {
+        std::cerr << filename + ": Incomplete entry file" << std::endl;
+        return {};
     }
 }
 

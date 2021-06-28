@@ -1,30 +1,32 @@
-#ifndef ENTRY_H
-#define ENTRY_H
+#pragma once
 
+#include <string>
+#include <optional>
 
-class Entry
-{
+class Entry {
     private:
-        string title;
         bool legacy = false;
         bool valid = false;
 
         void fitText();
 
     public:
-        string initrd, zImage, cmdline;
-        string partition;
+        std::string title;
+        std::string zImage;
+        std::string initrd;
+        std::string cmdline;
+        std::optional<std::string> dtbFile;
+        std::string partition;
 
-        // regular
-        Entry(string _partition, string _title, string _zImage, string _initrd, string _cmdline);
-        // legacy
-        Entry(string _partition, string _title, string _zImage, string _initrd);
-        // invalid
-        Entry();
+        /* regular */
+        Entry(std::string partition,
+              std::string title,
+              std::string zImage,
+              std::string initrd,
+              std::string cmdline,
+              std::optional<std::string> dtbFile);
+        /* legacy (downstream 3.x kernels) */
+        Entry(std::string partition, std::string title, std::string zImage, std::string initrd);
 
-        bool isValid();
-        string getTitle();
         void run();
 };
-
-#endif // ENTRY_H

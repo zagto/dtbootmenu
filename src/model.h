@@ -1,8 +1,7 @@
-#ifndef DEVICE_H
-#define DEVICE_H
+#pragma once
 
-extern string dtbPath;
+#include <string>
+
+extern std::string modelDtbPath;
 
 void detectModel();
-
-#endif // DEVICE_H

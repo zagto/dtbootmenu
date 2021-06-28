@@ -1,16 +1,17 @@
-#ifndef PARTITION_H
-#define PARTITION_H
+#pragma once
+
+#include <string>
+#include <vector>
 
 class Partition
 {
     private:
-        string path;
+        const std::string path;
 
-        void scanDir(string path);
+        void scanDir(std::string path);
 
     public:
-        Partition(string _path = "");
-        void scan(vector<string> directories = {"", "boot"});
-};
+        Partition(std::string _path = "");
 
-#endif // PARTITION_H
+        void scan(std::vector<std::string> directories = {"", "boot"});
+};

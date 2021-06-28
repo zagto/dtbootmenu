@@ -1,8 +1,12 @@
+#include "model.h"
 #include "common.h"
+#include <string>
+#include <iostream>
 
-string dtbPath;
+std::string modelDtbPath;
 
 void detectModel() {
-    dtbPath = loadFile("/proc/tegra3_project");
-    cout << "dtbootmenu on " << dtbPath << endl;
+    modelDtbPath = loadFile("/proc/tegra3_project");
+    std::cout << "dtbootmenu on " << modelDtbPath << std::endl;
+    modelDtbPath += + ".dtb";
 }

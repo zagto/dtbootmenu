@@ -1,77 +1,89 @@
+#include "entry.h"
 #include "common.h"
+#include "model.h"
+#include <cstdlib>
+#include <iostream>
+#include <unistd.h>
+#include <sys/wait.h>
+#include <sys/mount.h>
 
-Entry::Entry(string _partition, string _title, string _zImage, string _initrd, string _cmdline)
-{
-    partition = _partition;
-    title = _title;
-    zImage = _zImage;
-    initrd = _initrd;
-    cmdline = _cmdline;
+Entry::Entry(std::string partition,
+       std::string title,
+       std::string zImage,
+       std::string initrd,
+       std::string cmdline,
+       std::optional<std::string> dtbFile) :
+    title{title + " (" + (dtbFile ? "custom DTB, " : "") + "on " + partition + ")"},
+    zImage{zImage},
+    initrd{initrd},
+    cmdline{cmdline},
+    dtbFile{dtbFile},
+    partition{partition} {}
 
-    title = title + " (on " + partition + ")";
-    valid = true;
-}
+Entry::Entry(std::string partition, std::string title, std::string zImage, std::string initrd) :
+    legacy{true},
+    title{title + " (legacy, on " + partition + ")"},
+    zImage{zImage},
+    initrd{initrd} {}
 
-Entry::Entry(string _partition, string _title, string _zImage, string _initrd)
-{
-    partition = _partition;
-    title = _title;
-    zImage = _zImage;
-    initrd = _initrd;
-    cmdline = "";
 
-    title = title + " (on " + partition + ")";
-    valid = true;
-    legacy = true;
-}
-
-Entry::Entry()
-{
-}
-
-bool Entry::isValid()
-{
-    return valid;
-}
-
-string Entry::getTitle()
-{
-    return title;
-}
-
-void Entry::run()
-{
+void Entry::run() {
     mount(partition.c_str(), "/tmpmount", "ext4", MS_RDONLY, "");
 
-    if (legacy)
-    {
-        cmdline = loadFile("/proc/cmdline");
-        cmdline = cmdline.substr(cmdline.find("tegraid="));
+    std::string actualCommandLine;
+    if (legacy) {
+        actualCommandLine = loadFile("/proc/cmdline");
+        actualCommandLine = actualCommandLine.substr(cmdline.find("tegraid="));
+    } else {
+        actualCommandLine = cmdline;
     }
 
-    if (cmdline == "")
-    {
-        cout << "No cmdline, aborting\n";
+    if (cmdline == "") {
+        std::cout << "No cmdline, aborting\n";
         while (1);
     }
 
     pid_t pid;
     pid = fork();
+
+    std::string fullDtbPath;
+    if (dtbFile) {
+        fullDtbPath = *dtbFile;
+    } else {
+        fullDtbPath = std::string("/") + modelDtbPath;
+    }
     
-    string fullDtbPath = string("/") + dtbPath + ".dtb";
-    
-    if (pid == 0)
-    {
+    if (pid == 0) {
         if (legacy)
-            execl("/kexec", "/kexec", "--load", zImage.c_str(), "--initrd", initrd.c_str(), "--command-line", cmdline.c_str(), "--mem-min=0x85000000", "--atags", NULL);
+            execl("/kexec",
+                  "/kexec",
+                  "--load",
+                  zImage.c_str(),
+                  "--initrd",
+                  initrd.c_str(),
+                  "--command-line",
+                  actualCommandLine.c_str(),
+                  "--mem-min=0x85000000",
+                  "--atags",
+                  NULL);
         else
-            execl("/kexec", "/kexec", "--load", zImage.c_str(), "--initrd", initrd.c_str(), "--command-line", cmdline.c_str(), "--mem-min=0x85000000", "--dtb", fullDtbPath.c_str(), NULL);
+            execl("/kexec",
+                  "/kexec",
+                  "--load",
+                  zImage.c_str(),
+                  "--initrd",
+                  initrd.c_str(),
+                  "--command-line",
+                  actualCommandLine.c_str(),
+                  "--mem-min=0x85000000",
+                  "--dtb",
+                  fullDtbPath.c_str(),
+                  NULL);
     }
     int status;
     waitpid(pid, &status, 0);
-    if (status != 0)
-    {
-        cout << "Loading Kexec kernel failed, status " << status << "\n";
+    if (status != 0) {
+        std::cout << "Loading Kexec kernel failed, status " << status << std::endl;
         while(1);
     }
     execl("/kexec", "/kexec", "-e", NULL);
