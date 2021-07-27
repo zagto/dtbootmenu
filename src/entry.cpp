@@ -24,12 +24,13 @@ Entry::Entry(std::string partition, std::string title, std::string zImage, std::
     legacy{true},
     title{title + " (legacy, on " + partition + ")"},
     zImage{zImage},
-    initrd{initrd} {}
+    initrd{initrd},
+    partition{partition} {}
 
 
 void Entry::run() {
     if (mount(partition.c_str(), "/tmpmount", "ext4", MS_RDONLY, "") != 0) {
-        std::cerr << "Unable to mount paritition" << partition << ": " << errno << std::endl;
+        std::cerr << "Unable to mount paritition '" << partition << "': " << errno << std::endl;
         while(1);
     }
 

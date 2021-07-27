@@ -21,11 +21,11 @@ void scanDisks(int delay)
              Partition("/dev/mmcblk" + std::to_string(disk) + "p" + std::to_string(part)).scan();
     }
 
-    for (int disk = 0; fileExists("/dev/sd" + (char)('a' + disk)); disk++)
+    for (int disk = 0; fileExists("/dev/sd" + std::string(1, 'a' + disk)); disk++)
     {
-        Partition("/dev/sd" + std::to_string('a' + (char)disk)).scan();
-        for (int part = 1; fileExists("/dev/sd" + std::to_string('a' + disk) + std::to_string(part)); part++)
-            Partition("/dev/sd" + std::to_string('a' + disk) + std::to_string(part)).scan();
+        Partition("/dev/sd" + std::string(1, 'a' + disk)).scan();
+        for (int part = 1; fileExists("/dev/sd" + std::string(1, 'a' + disk) + std::to_string(part)); part++)
+            Partition("/dev/sd" + std::string(1, 'a' + disk) + std::to_string(part)).scan();
     }
 }
 
@@ -49,7 +49,7 @@ int main()
 
     detectModel();
 
-    scanDisks(5);
+    scanDisks(3);
 
 
     ui::mainLoop();

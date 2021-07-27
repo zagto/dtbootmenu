@@ -4,6 +4,7 @@
 #include <dirent.h>
 #include <sys/mount.h>
 #include <iostream>
+#include <unistd.h>
 
 //#define DEBUG_SCAN 1
 
@@ -30,7 +31,7 @@ void Partition::scanDir(std::string dirname)
         {
             std::string name = entry->d_name;
 #ifdef DEBUG_SCAN
-            cout << "Found file " << entry->d_name << ".\n";
+            std::cout << "Found file " << entry->d_name << ".\n";
 #endif
             if (checkExtension(name, ".dtbootmenu"))
             {
@@ -44,6 +45,9 @@ void Partition::scanDir(std::string dirname)
                 std::cout << "Unsing external " << name << " from " << path << ".\n";
                 saveFile("/" + name, loadFile(dirname + "/" + name));
             }
+        }
+        if (closedir(dir) != 0) {
+            throw std::runtime_error("closedir failed");
         }
     }
 }
@@ -69,6 +73,7 @@ void Partition::scan(std::vector<std::string> directories)
 #endif
             scanDir("/tmpmount/" + d);
         }
+
 
         if (umount("/tmpmount") != 0) {
             std::cerr << "unable to unmount partition " << path << ": " << errno << std::endl;
