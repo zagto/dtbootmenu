@@ -28,11 +28,16 @@ Entry::Entry(std::string partition, std::string title, std::string zImage, std::
 
 
 void Entry::run() {
-    mount(partition.c_str(), "/tmpmount", "ext4", MS_RDONLY, "");
+    if (mount(partition.c_str(), "/tmpmount", "ext4", MS_RDONLY, "") != 0) {
+        std::cerr << "Unable to mount paritition" << partition << ": " << errno << std::endl;
+        while(1);
+    }
 
     std::string actualCommandLine;
     if (legacy) {
         actualCommandLine = loadFile("/proc/cmdline");
+        std::cout << "Full Command line: " << actualCommandLine << std::endl;
+        std::cout << "tegraid position: " << actualCommandLine.find("tegraid=") << std::endl;
         actualCommandLine = actualCommandLine.substr(actualCommandLine.find("tegraid="));
     } else {
         actualCommandLine = cmdline;

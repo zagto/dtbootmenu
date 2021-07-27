@@ -5,6 +5,8 @@
 #include <sys/mount.h>
 #include <iostream>
 
+//#define DEBUG_SCAN 1
+
 bool checkExtension(std::string name, std::string ext)
 {
     if (name.length() >= ext.length())
@@ -52,23 +54,25 @@ Partition::Partition(std::string path) :
 void Partition::scan(std::vector<std::string> directories)
 {
 #ifdef DEBUG_SCAN
-    cout << "Scanning " + path + "\n";
+    std::cout << "Scanning " + path + "\n";
 #endif
     if (mount(path.c_str(), "/tmpmount", "ext4", MS_RDONLY, "") == 0)
     {
 #ifdef DEBUG_SCAN
-        cout << "Found supported file system on " + path + ".\n";
+        std::cout << "Found supported file system on " + path + ".\n";
 #endif
 
         for (std::string &d: directories)
         {
 #ifdef DEBUG_SCAN
-            cout << "Scanning " + d + " on " + path + "\n";
+            std::cout << "Scanning " + d + " on " + path + "\n";
 #endif
             scanDir("/tmpmount/" + d);
         }
 
-        umount("/tmpmount");
-
+        if (umount("/tmpmount") != 0) {
+            std::cerr << "unable to unmount partition " << path << ": " << errno << std::endl;
+            while (1);
+        }
     }
 }
