@@ -1,6 +1,6 @@
 # Kexec-Hardboot based bootloader/boot menu for booting modern Linux kernels on ASUS TF300T
 
-supports device trees (DTB)
+supports device trees (DTB). This repo contains the frontend. The kernel with the actual hardboot patch is found [here](https://github.com/zagto/tf300t-dtboot-kernel).
 
 # Installation
 ## Requirements
